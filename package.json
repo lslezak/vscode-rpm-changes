@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "repository": "https://github.com/lslezak/vscode-rpm-changes.git",
   "homepage": "https://github.com/lslezak/vscode-rpm-changes",
+  "publisher": "lslezak",
   "engines": {
     "vscode": "^1.104.0"
   },
