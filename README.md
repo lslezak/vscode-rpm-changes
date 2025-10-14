@@ -17,6 +17,8 @@ for generating a new changes entry.
 - The author name and email can be read from `.oscrc` file, from Git
   configuration or it can be configured in the extension settings, see below.
 
+![Screencast](media/screencast.gif)
+
 ## Extension Settings
 
 This extension uses these settings:
@@ -24,5 +26,5 @@ This extension uses these settings:
 - `rpm-changes.author.name`: The full name of the author.
 - `rpm-changes.author.email`: The email of the author.
 
-Just go to the settings configuration in VSCode (`Ctrl+,) and navigate to the
+Just go to the settings configuration in VSCode (`Ctrl + ,`) and navigate to the
 `Extensions -> RPM changes configuration` section.
