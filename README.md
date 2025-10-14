@@ -1,0 +1,28 @@
+# VSCode RPM Changes Extension
+
+This is an extension for the [Visual Studio
+Code](https://code.visualstudio.com/) (VSCode) IDE.
+
+It provides syntax highlighting for the RPM `*.changes` files and a command
+for generating a new changes entry.
+
+## Features
+
+- Syntax highlighting
+- Generating a new changes entry
+  - Use the command palette (`Ctrl+Shift+P`)
+    and type `Insert a new changes entry` to execute the command.
+  - Or right-click in the editor and select the `Insert a new changes entry`
+    item in the context menu.
+- The author name and email can be read from `.oscrc` file, from Git
+  configuration or it can be configured in the extension settings, see below.
+
+## Extension Settings
+
+This extension uses these settings:
+
+- `rpm-changes.author.name`: The full name of the author.
+- `rpm-changes.author.email`: The email of the author.
+
+Just go to the settings configuration in VSCode (`Ctrl+,) and navigate to the
+`Extensions -> RPM changes configuration` section.

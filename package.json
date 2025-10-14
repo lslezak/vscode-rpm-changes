@@ -1,0 +1,95 @@
+{
+  "name": "rpm-changes",
+  "displayName": "RPM changes file",
+  "description": "Support for RPM changes file format.",
+  "version": "1.0.0",
+  "repository": "https://github.com/lslezak/vscode-rpm-changes.git",
+  "homepage": "https://github.com/lslezak/vscode-rpm-changes",
+  "engines": {
+    "vscode": "^1.104.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "rpm-changes.insertNewEntry",
+        "title": "Insert a New Changes Entry"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "rpm-changes.insertNewEntry",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "rpm-changes",
+        "aliases": [
+          "RPM changes file",
+          "rpm-changes"
+        ],
+        "extensions": [
+          ".changes"
+        ],
+        "firstLine": "-{67}",
+        "configuration": "./languages/rpm-changes-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "rpm-changes",
+        "scopeName": "source.rpm-changes",
+        "path": "./syntaxes/rpm-changes.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "RPM changes configuration",
+      "type": "object",
+      "properties": {
+        "rpm-changes.author.name": {
+          "description": "Full name of the author used in the new entries",
+          "type": "string"
+        },
+        "rpm-changes.author.email": {
+          "description": "Author email used in the new entries",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.104.0",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.2",
+    "esbuild": "^0.25.10",
+    "eslint": "^9.36.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.3"
+  }
+}

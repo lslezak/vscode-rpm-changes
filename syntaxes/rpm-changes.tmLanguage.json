@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "RPM changes file",
+  "patterns": [
+    {
+      "match": "^-{67}$",
+      "name": "markup.heading.separator.rpm-changes"
+    },
+    {
+      "match": "^(-{4,66})$",
+      "name": "invalid.illegal.separator.rpm-changes"
+    },
+    {
+      "match": "^(-{68,})$",
+      "name": "invalid.illegal.separator.rpm-changes"
+    },
+    {
+			"captures": {
+				"1": { "name": "constant.numeric.date.rpm-changes" },
+				"2": { "name": "entity.name.function.email.rpm-changes" }
+			},
+      "match": "^([A-Z][a-z][a-z] [A-Z][a-z][a-z] [ 0-9][0-9] [0-9:]{8} [A-Z]+ [0-9]+) - (.*)$",
+      "name": "meta.header.rpm-changes"
+    }
+  ],
+  "scopeName": "source.rpm-changes"
+}
