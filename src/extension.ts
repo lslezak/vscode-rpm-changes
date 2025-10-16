@@ -85,6 +85,16 @@ export function activate(context: vscode.ExtensionContext) {
     null,
     context.subscriptions
   );
+
+  context.subscriptions.push(
+    vscode.languages.registerCodeActionsProvider(
+      "rpm-changes",
+      new WeekdayActions(),
+      {
+        providedCodeActionKinds: WeekdayActions.providedCodeActionKinds,
+      }
+    )
+  );
 }
 
 // mappings for timezones not supported by JavaScript Date
@@ -93,13 +103,18 @@ const tzMappings: { [key: string]: string } = {
   CET: "UTC+1",
 };
 
+// remember replacements for wrong weekdays
+const replacements = new Map<vscode.Range, string>();
+
 function updateDiagnostics(
   document: vscode.TextDocument,
   collection: vscode.DiagnosticCollection
 ): void {
+  replacements.clear();
+
   if (document && document.languageId === "rpm-changes") {
     const regEx =
-      /^(([A-Z][a-z]{2}) +[A-Z][a-z]{2} +[0-9]{1,2} +[0-9:]{8} +([A-Z]+) +([0-9]+)) +- +/gm;
+      /^(([A-Z][a-z]{2}) +[A-Z][a-z]{2} +[0-9]+ +[0-9:]+ +([A-Z]+) +([0-9]+)) +- +/gm;
     const text = document.getText();
 
     let lastMatchIndex = -1;
@@ -114,7 +129,7 @@ function updateDiagnostics(
 
       if (timeZone !== "UTC" && timeZone !== "CEST" && timeZone !== "CET") {
         diagnostics.push({
-          message: `The RPM changes extension does not support timezone "${timeZone}" (only UTC, CEST and CET are supported)`,
+          message: `The RPM changes extension does not support timezone "${timeZone}" (only UTC, CET and CEST are supported)`,
           range: new vscode.Range(
             document.positionAt(
               match.index +
@@ -149,7 +164,7 @@ function updateDiagnostics(
             document.positionAt(match.index),
             document.positionAt(match.index + match[1].length)
           ),
-          severity: vscode.DiagnosticSeverity.Warning,
+          severity: vscode.DiagnosticSeverity.Error,
         });
       } else {
         if (lastMatchDate && unixTime > lastMatchDate) {
@@ -184,15 +199,21 @@ function updateDiagnostics(
         });
 
         if (weekDay !== match[2]) {
+          const range = new vscode.Range(
+            document.positionAt(match.index),
+            document.positionAt(match.index + match[2].length)
+          );
 
           diagnostics.push({
-            message: `The weekday "${match[2]}" does not match the date "${date.toDateString()}"`,
-            range: new vscode.Range(
-              document.positionAt(match.index),
-              document.positionAt(match.index + match[2].length)
-            ),
+            message: `The weekday "${
+              match[2]
+            }" does not match the date "${date.toDateString()}"`,
+            range,
             severity: vscode.DiagnosticSeverity.Warning,
           });
+
+          // remember the replacement for later
+          replacements.set(range, weekDay);
         }
 
         // remember the last valid date
@@ -210,3 +231,43 @@ function updateDiagnostics(
 
 // This method is called when the extension is deactivated
 export function deactivate() {}
+
+/**
+ * Provides code action for fixing wrong days of the week
+ */
+export class WeekdayActions implements vscode.CodeActionProvider {
+  public static readonly providedCodeActionKinds = [
+    vscode.CodeActionKind.QuickFix,
+  ];
+
+  public provideCodeActions(
+    document: vscode.TextDocument,
+    range: vscode.Range
+  ): vscode.CodeAction[] | undefined {
+    const actions: vscode.CodeAction[] = [];
+
+    for (const [r, replacement] of replacements) {
+      // create the fix if the replacement is in the requested range
+      if (range.intersection(r)) {
+        actions.push(this.createFix(document, r, replacement));
+      }
+    }
+
+    return actions.length ? actions : undefined;
+  }
+
+  // create a code action that will replace the wrong weekday with the correct one
+  private createFix(
+    document: vscode.TextDocument,
+    range: vscode.Range,
+    replacement: string
+  ): vscode.CodeAction {
+    const fix = new vscode.CodeAction(
+      `Convert the day to "${replacement}"`,
+      vscode.CodeActionKind.QuickFix
+    );
+    fix.edit = new vscode.WorkspaceEdit();
+    fix.edit.replace(document.uri, range, replacement);
+    return fix;
+  }
+}

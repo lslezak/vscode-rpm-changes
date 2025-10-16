@@ -9,6 +9,7 @@ to structure this file.
 
 - Validate the order of the changes
 - Less strict regular expression for matching the date header
+- Quick fix for invalid week days
 
 ## [1.0.0] - 2025-10-14
 
