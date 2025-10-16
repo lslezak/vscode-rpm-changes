@@ -19,7 +19,7 @@
 				"1": { "name": "constant.numeric.date.rpm-changes" },
 				"2": { "name": "entity.name.function.email.rpm-changes" }
 			},
-      "match": "^([A-Z][a-z][a-z] [A-Z][a-z][a-z] [ 0-9][0-9] [0-9:]{8} [A-Z]+ [0-9]+) - (.*)$",
+      "match": "^([A-Z][a-z]{2} +[A-Z][a-z]{2} +[0-9]{1,2} +[0-9:]{8} +[A-Z]+ +[0-9]+) +- +(.*)$",
       "name": "meta.header.rpm-changes"
     }
   ],
