@@ -7,7 +7,7 @@ to structure this file.
 
 ## [Unreleased]
 
-- Validate the order of the changes
+- Validate the order of the changes with a proposed quick fix
 - Less strict regular expression for matching the date header
 - Quick fix for invalid week days
 
