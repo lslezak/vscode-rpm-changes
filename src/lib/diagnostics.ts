@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { formatDistanceToNow } from "date-fns";
 
 // remember replacements for wrong weekdays and dates
 export const dayReplacements = new Map<vscode.Range, string>();
@@ -16,13 +17,17 @@ const offsetMappings: { [key: string]: string } = {
   CEST: "+02:00",
 };
 
+const hoverDecorationType = vscode.window.createTextEditorDecorationType({});
 
 export function updateDiagnostics(
-  document: vscode.TextDocument,
+  editor: vscode.TextEditor,
   collection: vscode.DiagnosticCollection
 ): void {
   dayReplacements.clear();
   dateReplacements.clear();
+
+  const decorations: vscode.DecorationOptions[] = [];
+  const document = editor.document;
 
   if (document && document.languageId === "rpm-changes") {
     const regEx =
@@ -76,6 +81,11 @@ export function updateDiagnostics(
             severity: vscode.DiagnosticSeverity.Error,
           });
         } else {
+          const rangeDate = new vscode.Range(
+            document.positionAt(match.index),
+            document.positionAt(match.index + match[1].length)
+          );
+
           if (lastMatchDate && unixTime > lastMatchDate) {
             const range = new vscode.Range(
               document.positionAt(lastMatchIndex),
@@ -91,13 +101,7 @@ export function updateDiagnostics(
               severity: vscode.DiagnosticSeverity.Error,
               relatedInformation: [
                 new vscode.DiagnosticRelatedInformation(
-                  new vscode.Location(
-                    document.uri,
-                    new vscode.Range(
-                      document.positionAt(match.index),
-                      document.positionAt(match.index + match[1].length)
-                    )
-                  ),
+                  new vscode.Location(document.uri, rangeDate),
                   `Date "${match[1]}" is newer than this one`
                 ),
               ],
@@ -135,6 +139,12 @@ export function updateDiagnostics(
           lastMatchDate = unixTime;
           lastMatchIndex = match.index;
           lastMatchLength = match[1].length;
+
+          // add hover decoration for the date
+          decorations.push({
+            range: rangeDate,
+            hoverMessage: formatDistanceToNow(date, { addSuffix: true }),
+          });
         }
       }
     }
@@ -143,4 +153,7 @@ export function updateDiagnostics(
   } else {
     collection.clear();
   }
+
+  // add hover decoration for the date
+  editor.setDecorations(hoverDecorationType, decorations);
 }
