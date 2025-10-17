@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { date } from "./date";
+import { formatDate } from "./date";
 import { packager } from "./packager";
 
 /**
@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
             editor.selection.active,
             "-------------------------------------------------------------------\n"
           );
-          editBuilder.insert(editor.selection.active, date());
+          editBuilder.insert(editor.selection.active, formatDate());
           editBuilder.insert(editor.selection.active, " - ");
           editBuilder.insert(editor.selection.active, packager());
           editBuilder.insert(editor.selection.active, "\n\n- \n\n");
@@ -97,20 +97,28 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-// mappings for timezones not supported by JavaScript Date
+// mappings for timezones not supported by JavaScript Date parser
 const tzMappings: { [key: string]: string } = {
-  CEST: "UTC+2",
   CET: "UTC+1",
+  CEST: "UTC+2",
 };
 
-// remember replacements for wrong weekdays
-const replacements = new Map<vscode.Range, string>();
+// mappings for getting the correct weekday for a given timezone
+const offsetMappings: { [key: string]: string } = {
+  CET: "+01:00",
+  CEST: "+02:00",
+};
+
+// remember replacements for wrong weekdays and dates
+const dayReplacements = new Map<vscode.Range, string>();
+const dateReplacements = new Map<vscode.Range, number>();
 
 function updateDiagnostics(
   document: vscode.TextDocument,
   collection: vscode.DiagnosticCollection
 ): void {
-  replacements.clear();
+  dayReplacements.clear();
+  dateReplacements.clear();
 
   if (document && document.languageId === "rpm-changes") {
     const regEx =
@@ -126,7 +134,6 @@ function updateDiagnostics(
 
     while ((match = regEx.exec(text))) {
       const timeZone = match[3];
-
       if (timeZone !== "UTC" && timeZone !== "CEST" && timeZone !== "CET") {
         diagnostics.push({
           message: `The RPM changes extension does not support timezone "${timeZone}" (only UTC, CET and CEST are supported)`,
@@ -144,82 +151,87 @@ function updateDiagnostics(
           ),
           severity: vscode.DiagnosticSeverity.Information,
         });
-        continue;
-      }
-
-      // Date parsing in JavaScript is broken for timezones other than UTC
-      // so we replace CEST/CET with UTC+2/UTC+1
-      const tzOffset = tzMappings[timeZone];
-      const changeDate = tzOffset
-        ? match[1].replace(timeZone, tzOffset)
-        : match[1];
-
-      const date = new Date(changeDate);
-      const unixTime = date.getTime();
-
-      if (isNaN(unixTime)) {
-        diagnostics.push({
-          message: 'Invalid date "' + match[1] + '"',
-          range: new vscode.Range(
-            document.positionAt(match.index),
-            document.positionAt(match.index + match[1].length)
-          ),
-          severity: vscode.DiagnosticSeverity.Error,
-        });
       } else {
-        if (lastMatchDate && unixTime > lastMatchDate) {
+        // Date parsing in JavaScript is broken for timezones other than UTC
+        // so we replace CEST/CET with UTC+2/UTC+1
+        const tzOffset = tzMappings[timeZone];
+        const changeDate = tzOffset
+          ? match[1].replace(timeZone, tzOffset)
+          : match[1];
+
+        const date = new Date(changeDate);
+        const unixTime = date.getTime();
+
+        if (isNaN(unixTime)) {
           diagnostics.push({
-            message: `Date "${text.slice(
-              lastMatchIndex,
-              lastMatchIndex + lastMatchLength
-            )}" is not in sequence`,
+            message: 'Invalid date "' + match[1] + '"',
             range: new vscode.Range(
-              document.positionAt(lastMatchIndex),
-              document.positionAt(lastMatchIndex + lastMatchLength)
+              document.positionAt(match.index),
+              document.positionAt(match.index + match[1].length)
             ),
             severity: vscode.DiagnosticSeverity.Error,
-            relatedInformation: [
-              new vscode.DiagnosticRelatedInformation(
-                new vscode.Location(
-                  document.uri,
-                  new vscode.Range(
-                    document.positionAt(match.index),
-                    document.positionAt(match.index + match[1].length)
-                  )
+          });
+        } else {
+          if (lastMatchDate && unixTime > lastMatchDate) {
+            const range = new vscode.Range(
+              document.positionAt(lastMatchIndex),
+              document.positionAt(lastMatchIndex + lastMatchLength)
+            );
+
+            diagnostics.push({
+              message: `Date "${text.slice(
+                lastMatchIndex,
+                lastMatchIndex + lastMatchLength
+              )}" is not in sequence`,
+              range,
+              severity: vscode.DiagnosticSeverity.Error,
+              relatedInformation: [
+                new vscode.DiagnosticRelatedInformation(
+                  new vscode.Location(
+                    document.uri,
+                    new vscode.Range(
+                      document.positionAt(match.index),
+                      document.positionAt(match.index + match[1].length)
+                    )
+                  ),
+                  `Date "${match[1]}" is newer than this one`
                 ),
-                `Date "${match[1]}" is newer than this one`
-              ),
-            ],
-          });
-        }
+              ],
+            });
 
-        const weekDay = date.toLocaleString("en-US", {
-          weekday: "short",
-          timeZone: timeZone,
-        });
+            // remember the replacement for later, propose using this time + 1 minute
+            dateReplacements.set(range, unixTime + 60 * 1000);
+          }
 
-        if (weekDay !== match[2]) {
-          const range = new vscode.Range(
-            document.positionAt(match.index),
-            document.positionAt(match.index + match[2].length)
-          );
-
-          diagnostics.push({
-            message: `The weekday "${
-              match[2]
-            }" does not match the date "${date.toDateString()}"`,
-            range,
-            severity: vscode.DiagnosticSeverity.Warning,
+          const weekDay = date.toLocaleString("en-US", {
+            weekday: "short",
+            // use a mapping because "CET" is supported but "CEST" is not :-(
+            timeZone: offsetMappings[timeZone],
           });
 
-          // remember the replacement for later
-          replacements.set(range, weekDay);
-        }
+          if (weekDay !== match[2]) {
+            const range = new vscode.Range(
+              document.positionAt(match.index),
+              document.positionAt(match.index + match[2].length)
+            );
 
-        // remember the last valid date
-        lastMatchDate = unixTime;
-        lastMatchIndex = match.index;
-        lastMatchLength = match[1].length;
+            diagnostics.push({
+              message: `The weekday "${
+                match[2]
+              }" does not match the date "${date.toDateString()}"`,
+              range,
+              severity: vscode.DiagnosticSeverity.Warning,
+            });
+
+            // remember the replacement for later
+            dayReplacements.set(range, weekDay);
+          }
+
+          // remember the last valid date
+          lastMatchDate = unixTime;
+          lastMatchIndex = match.index;
+          lastMatchLength = match[1].length;
+        }
       }
     }
 
@@ -246,10 +258,17 @@ export class WeekdayActions implements vscode.CodeActionProvider {
   ): vscode.CodeAction[] | undefined {
     const actions: vscode.CodeAction[] = [];
 
-    for (const [r, replacement] of replacements) {
-      // create the fix if the replacement is in the requested range
+    for (const [r, replacement] of dayReplacements) {
+      // create the weekday fix if the replacement is in the requested range
       if (range.intersection(r)) {
-        actions.push(this.createFix(document, r, replacement));
+        actions.push(this.createWeekdayFix(document, r, replacement));
+      }
+    }
+
+    for (const [r, date] of dateReplacements) {
+      // create the date fix if the replacement is in the requested range
+      if (range.intersection(r)) {
+        actions.push(this.createDateFix(document, r, date));
       }
     }
 
@@ -257,7 +276,7 @@ export class WeekdayActions implements vscode.CodeActionProvider {
   }
 
   // create a code action that will replace the wrong weekday with the correct one
-  private createFix(
+  private createWeekdayFix(
     document: vscode.TextDocument,
     range: vscode.Range,
     replacement: string
@@ -266,8 +285,29 @@ export class WeekdayActions implements vscode.CodeActionProvider {
       `Convert the day to "${replacement}"`,
       vscode.CodeActionKind.QuickFix
     );
+
     fix.edit = new vscode.WorkspaceEdit();
     fix.edit.replace(document.uri, range, replacement);
+    fix.isPreferred = true;
+
+    return fix;
+  }
+
+  private createDateFix(
+    document: vscode.TextDocument,
+    range: vscode.Range,
+    replacement: number
+  ): vscode.CodeAction {
+    const fixedDate = formatDate(new Date(replacement));
+    const fix = new vscode.CodeAction(
+      `Set the date to "${fixedDate}"`,
+      vscode.CodeActionKind.QuickFix
+    );
+
+    fix.edit = new vscode.WorkspaceEdit();
+    fix.edit.replace(document.uri, range, fixedDate);
+    fix.isPreferred = true;
+
     return fix;
   }
 }

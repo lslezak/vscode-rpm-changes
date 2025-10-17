@@ -12,8 +12,8 @@ function padNumber(num: number): string {
  * Generate the current date string in the format used by RPM changes files
  * @returns {string} The current date string
  */
-export function date(): string {
-  const now = new Date();
+export function formatDate(date?: Date): string {
+  const now = date || new Date();
 
   const weekday = now.toLocaleString("en-US", {
     weekday: "short",
