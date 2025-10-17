@@ -7,9 +7,9 @@ to structure this file.
 
 ## [Unreleased]
 
-- Validate the order of the changes with a proposed quick fix
+- Validate the order of the changes, propose a quick fix (previous + 1 minute)
+- Validate the weekday value, propose a quick fix with the correct weekday
 - Less strict regular expression for matching the date header
-- Quick fix for invalid week days
 - Show a tooltip with relative date ("5 days ago") on hover
 
 ## [1.0.0] - 2025-10-14
