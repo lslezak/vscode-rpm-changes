@@ -9,6 +9,7 @@ esbuild.js
 vsc-extension-quickstart.md
 example.changes
 DEVELOPMENT.md
+media/screencast.gif
 **/tsconfig.json
 **/eslint.config.mjs
 **/*.map

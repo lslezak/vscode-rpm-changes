@@ -24,7 +24,7 @@ for generating a new changes entry.
 - Validates the date sequence, dates not in sequence are reported as errors.
   As a quick fix previous change date increased by minutes is offered.
 
-![Screencast](media/screencast.gif)
+![Screencast](https://raw.githubusercontent.com/lslezak/vscode-rpm-changes/refs/tags/v1.0.1/media/screencast.gif)
 
 ## Extension Settings
 
