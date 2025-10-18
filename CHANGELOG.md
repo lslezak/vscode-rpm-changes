@@ -13,6 +13,7 @@ to structure this file.
 - Show a tooltip with relative date ("5 days ago") on hover
 - Do not package the screencast GIF into the published VSCode package,
   makes the package much smaller.
+- Added package icon :smiley:
 
 ## [1.0.0] - 2025-10-14
 

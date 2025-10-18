@@ -10,6 +10,7 @@ vsc-extension-quickstart.md
 example.changes
 DEVELOPMENT.md
 media/screencast.gif
+media/icon.svg
 **/tsconfig.json
 **/eslint.config.mjs
 **/*.map
