@@ -5,7 +5,7 @@ Here is a summary of the notable changes in the "rpm-changes" extension.
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how
 to structure this file.
 
-## [Unreleased]
+## [1.1.0] - 2025-10-18
 
 - Validate the order of the changes, propose a quick fix (previous + 1 minute)
 - Validate the weekday value, propose a quick fix with the correct weekday

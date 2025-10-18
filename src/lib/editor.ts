@@ -2,6 +2,10 @@ import * as vscode from "vscode";
 import { formatDate } from "./date";
 import { packager } from "./packager";
 
+/**
+ * Add a new entry to the changes file in the active editor
+ * @param editor The active text editor
+ */
 export function addNewEntry(editor: vscode.TextEditor) {
   // Move the cursor to the very beginning of the document
   const startPosition = new vscode.Position(0, 0);

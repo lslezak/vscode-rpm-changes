@@ -14,6 +14,11 @@
   a *.vsix package file.
 - To install the extension locally run `code --install-extension *.vsix`.
 
+## Publishing the extension
+
+- Run `npx vsce publish minor` to bump the minor version and publish the
+  package.
+
 ## Links
 
 - [TextMate grammar

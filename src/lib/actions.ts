@@ -51,6 +51,7 @@ export class WeekdayActions implements vscode.CodeActionProvider {
     return fix;
   }
 
+  // create a code action that will replace a time out of sequence
   private createDateFix(
     document: vscode.TextDocument,
     range: vscode.Range,

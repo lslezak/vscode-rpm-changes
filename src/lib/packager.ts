@@ -6,7 +6,7 @@ import * as childProcess from "child_process";
 /**
  * Find the .oscrc configuration file in the system
  *
- * @returns {string | null} the path to the oscrc file or null if not found
+ * @returns {string | null} the path to the .oscrc file or null if not found
  */
 function findOscRc(): string | null {
   // see https://github.com/openSUSE/osc/blob/10f5e7309ea6ae6f45e03b3e672dcdd853c0136e/osc/conf.py#L2123
@@ -42,9 +42,9 @@ function findOscRc(): string | null {
 }
 
 /**
- * Read the author name and email from the oscrc configuration file
+ * Read the author name and email from the .oscrc configuration file
  *
- * @param file the oscrc configuration file
+ * @param file the .oscrc configuration file
  * @returns an object with name and email properties (undefined if not found)
  */
 function readOscRc(file: string): {
@@ -105,7 +105,7 @@ export function packager(): string {
     return formatPackager(configuredName, configuredEmail);
   }
 
-  // https://github.com/openSUSE/obs-build/blob/277ee4c8f01904b0f0a77a6674e46f1132a16f48/vc#L34
+  // see https://github.com/openSUSE/obs-build/blob/277ee4c8f01904b0f0a77a6674e46f1132a16f48/vc#L34
 
   const oscrc = findOscRc();
 

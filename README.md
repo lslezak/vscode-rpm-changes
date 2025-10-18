@@ -24,7 +24,7 @@ for generating a new changes entry.
 - Validates the date sequence, dates not in sequence are reported as errors.
   As a quick fix previous change date increased by minutes is offered.
 
-![Screencast](https://raw.githubusercontent.com/lslezak/vscode-rpm-changes/refs/tags/v1.0.1/media/screencast.gif)
+![Screencast](https://raw.githubusercontent.com/lslezak/vscode-rpm-changes/refs/tags/v1.1.0/media/screencast.gif)
 
 ## Extension Settings
 
@@ -38,5 +38,5 @@ Just go to the settings configuration in VSCode (`Ctrl + ,`) and navigate to the
 
 ## Known limitations
 
-- Can process only UTC, CET and CEST time zone dates, others are ignored
-  and not validated.
+- Can validate dates only in UTC, CET and CEST time zones, all others are
+  ignored and not validated.
