@@ -22,23 +22,31 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disposable);
 
-  const collection = vscode.languages.createDiagnosticCollection("rpm-changes");
-
   let activeEditor = vscode.window.activeTextEditor;
   // delay updating the diagnostics if the document is changing too quickly
   let timeout: NodeJS.Timeout | undefined = undefined;
 
-  if (activeEditor) {
-    updateDiagnostics(activeEditor, collection);
-  }
+  const refreshDiagnostics = function () {
+    if (activeEditor && activeEditor.document.languageId === "rpm-changes") {
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = undefined;
+      }
+
+      const delay = updateDiagnostics(activeEditor);
+      if (delay) {
+        // schedule next update after the suggested delay
+        timeout = setTimeout(refreshDiagnostics, delay);
+      }
+    }
+  };
+
+  refreshDiagnostics();
 
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       activeEditor = editor;
-
-      if (editor) {
-        updateDiagnostics(editor, collection);
-      }
+      refreshDiagnostics();
     })
   );
 
@@ -56,12 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
           clearTimeout(timeout);
         }
         // schedule a new validation
-        timeout = setTimeout(
-          () =>
-            activeEditor &&
-            updateDiagnostics(activeEditor, collection),
-          500
-        );
+        timeout = setTimeout(refreshDiagnostics, 500);
       }
     },
     null,

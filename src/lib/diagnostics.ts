@@ -18,16 +18,15 @@ const offsetMappings: { [key: string]: string } = {
 };
 
 const hoverDecorationType = vscode.window.createTextEditorDecorationType({});
+const collection = vscode.languages.createDiagnosticCollection("rpm-changes");
 
-export function updateDiagnostics(
-  editor: vscode.TextEditor,
-  collection: vscode.DiagnosticCollection
-): void {
+export function updateDiagnostics(editor: vscode.TextEditor): number | null {
   dayReplacements.clear();
   dateReplacements.clear();
 
   const decorations: vscode.DecorationOptions[] = [];
   const document = editor.document;
+  let newestChangeDate: number | null = null;
 
   if (document && document.languageId === "rpm-changes") {
     const regEx =
@@ -81,6 +80,11 @@ export function updateDiagnostics(
             severity: vscode.DiagnosticSeverity.Error,
           });
         } else {
+          // remember the newest change date
+          if (newestChangeDate === null || unixTime > newestChangeDate) {
+            newestChangeDate = unixTime;
+          }
+
           const rangeDate = new vscode.Range(
             document.positionAt(match.index),
             document.positionAt(match.index + match[1].length)
@@ -156,4 +160,16 @@ export function updateDiagnostics(
 
   // add hover decoration for the date
   editor.setDecorations(hoverDecorationType, decorations);
+
+  // no change found, no refresh needed
+  if (newestChangeDate === null) {
+    return null;
+  }
+
+  // the "X minutes ago" hover messages are displayed for dates within the last
+  // 45 minutes, so refresh them every minute; older dates are refreshed once
+  // an hour
+  return Date.now() - newestChangeDate < 45 * 60 * 1000
+    ? 60 * 1000
+    : 60 * 60 * 1000;
 }
