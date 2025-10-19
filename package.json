@@ -2,7 +2,7 @@
   "name": "rpm-changes",
   "displayName": "RPM changes file",
   "description": "Support for RPM changes file format.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "repository": "https://github.com/lslezak/vscode-rpm-changes.git",
   "homepage": "https://github.com/lslezak/vscode-rpm-changes",
   "publisher": "lslezak",
