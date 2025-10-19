@@ -7,8 +7,13 @@ to structure this file.
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-10-19
+
 - Refresh the "X minutes ago" hover messages every minute so they always use the
   correct value, the others are refreshed once an hour.
+- Check for invalid dates like Feb 30 or Apr 31 which are accepted by
+  the JavaScript Date parser by overflowing to the next month but should be
+  reported as invalid by the validator.
 
 ## [1.1.0] - 2025-10-18
 

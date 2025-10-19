@@ -18,9 +18,9 @@ for generating a new changes entry.
 - The author name and email can be read from `.oscrc` file, from Git
   configuration or it can be configured in the extension settings, see below.
 - On hover it displays a tooltip with relative date.
-- Validates the weekday of the date, when changing a date manually you
-  might forget to update the week day. A quick fix with the correct weekday
-  is available.
+- Validates the weekday of the date, when changing a date manually you might
+  forget to update the day of the week. A quick fix with the correct weekday is
+  available.
 - Validates the date sequence, dates not in sequence are reported as errors.
   As a quick fix previous change date increased by minutes is offered.
 

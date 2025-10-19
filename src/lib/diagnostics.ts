@@ -30,7 +30,7 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
 
   if (document && document.languageId === "rpm-changes") {
     const regEx =
-      /^(([A-Z][a-z]{2}) +[A-Z][a-z]{2} +[0-9]+ +[0-9:]+ +([A-Z]+) +([0-9]+)) +- +/gm;
+      /^(([A-Z][a-z]{2}) +[A-Z][a-z]{2} +([0-9]+) +[0-9:]+ +([A-Z]+) +([0-9]+)) +- +/gm;
     const text = document.getText();
 
     let lastMatchIndex = -1;
@@ -41,7 +41,7 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
     const diagnostics: vscode.Diagnostic[] = [];
 
     while ((match = regEx.exec(text))) {
-      const timeZone = match[3];
+      const timeZone = match[4];
       if (timeZone !== "UTC" && timeZone !== "CEST" && timeZone !== "CET") {
         diagnostics.push({
           message: `The RPM changes extension does not support timezone "${timeZone}" (only UTC, CET and CEST are supported)`,
@@ -49,8 +49,8 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
             document.positionAt(
               match.index +
                 match[1].length -
-                match[3].length -
                 match[4].length -
+                match[5].length -
                 1
             ),
             document.positionAt(
@@ -79,77 +79,103 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
             ),
             severity: vscode.DiagnosticSeverity.Error,
           });
-        } else {
-          // remember the newest change date
-          if (newestChangeDate === null || unixTime > newestChangeDate) {
-            newestChangeDate = unixTime;
-          }
 
-          const rangeDate = new vscode.Range(
-            document.positionAt(match.index),
-            document.positionAt(match.index + match[1].length)
-          );
+          continue;
+        }
 
-          if (lastMatchDate && unixTime > lastMatchDate) {
-            const range = new vscode.Range(
-              document.positionAt(lastMatchIndex),
-              document.positionAt(lastMatchIndex + lastMatchLength)
-            );
-
-            diagnostics.push({
-              message: `Date "${text.slice(
-                lastMatchIndex,
-                lastMatchIndex + lastMatchLength
-              )}" is not in sequence`,
-              range,
-              severity: vscode.DiagnosticSeverity.Error,
-              relatedInformation: [
-                new vscode.DiagnosticRelatedInformation(
-                  new vscode.Location(document.uri, rangeDate),
-                  `Date "${match[1]}" is newer than this one`
-                ),
-              ],
-            });
-
-            // remember the replacement for later, propose using this time + 1 minute
-            dateReplacements.set(range, unixTime + 60 * 1000);
-          }
-
-          const weekDay = date.toLocaleString("en-US", {
-            weekday: "short",
+        // check for invalid dates like Feb 30, Apr 31... which are accepted by
+        // the JavaScript Date parser by overflowing to the next month
+        const day = Number(match[3]);
+        if (day > 28) {
+          const parsedDay = date.toLocaleString("en-US", {
+            day: "numeric",
             // use a mapping because "CET" is supported but "CEST" is not :-(
             timeZone: offsetMappings[timeZone],
           });
 
-          if (weekDay !== match[2]) {
-            const range = new vscode.Range(
-              document.positionAt(match.index),
-              document.positionAt(match.index + match[2].length)
-            );
-
+          if (Number(parsedDay) !== day) {
             diagnostics.push({
-              message: `The weekday "${
-                match[2]
-              }" does not match the date "${date.toDateString()}"`,
-              range,
-              severity: vscode.DiagnosticSeverity.Warning,
+              message: 'Invalid date "' + match[1] + '"',
+              range: new vscode.Range(
+                document.positionAt(match.index),
+                document.positionAt(match.index + match[1].length)
+              ),
+              severity: vscode.DiagnosticSeverity.Error,
             });
-
-            // remember the replacement for later
-            dayReplacements.set(range, weekDay);
           }
 
-          // remember the last valid date
-          lastMatchDate = unixTime;
-          lastMatchIndex = match.index;
-          lastMatchLength = match[1].length;
-
-          // add hover decoration for the date
-          decorations.push({
-            range: rangeDate,
-            hoverMessage: formatDistanceToNow(date, { addSuffix: true }),
-          });
+          continue;
         }
+
+        // remember the newest change date
+        if (newestChangeDate === null || unixTime > newestChangeDate) {
+          newestChangeDate = unixTime;
+        }
+
+        const rangeDate = new vscode.Range(
+          document.positionAt(match.index),
+          document.positionAt(match.index + match[1].length)
+        );
+
+        if (lastMatchDate && unixTime > lastMatchDate) {
+          const range = new vscode.Range(
+            document.positionAt(lastMatchIndex),
+            document.positionAt(lastMatchIndex + lastMatchLength)
+          );
+
+          diagnostics.push({
+            message: `Date "${text.slice(
+              lastMatchIndex,
+              lastMatchIndex + lastMatchLength
+            )}" is not in sequence`,
+            range,
+            severity: vscode.DiagnosticSeverity.Error,
+            relatedInformation: [
+              new vscode.DiagnosticRelatedInformation(
+                new vscode.Location(document.uri, rangeDate),
+                `Date "${match[1]}" is newer than this one`
+              ),
+            ],
+          });
+
+          // remember the replacement for later, propose using this time + 1 minute
+          dateReplacements.set(range, unixTime + 60 * 1000);
+        }
+
+        const weekDay = date.toLocaleString("en-US", {
+          weekday: "short",
+          // use a mapping because "CET" is supported but "CEST" is not :-(
+          timeZone: offsetMappings[timeZone],
+        });
+
+        if (weekDay !== match[2]) {
+          const range = new vscode.Range(
+            document.positionAt(match.index),
+            document.positionAt(match.index + match[2].length)
+          );
+
+          diagnostics.push({
+            message: `The weekday "${
+              match[2]
+            }" does not match the date "${date.toDateString()}"`,
+            range,
+            severity: vscode.DiagnosticSeverity.Warning,
+          });
+
+          // remember the replacement for later
+          dayReplacements.set(range, weekDay);
+        }
+
+        // remember the last valid date
+        lastMatchDate = unixTime;
+        lastMatchIndex = match.index;
+        lastMatchLength = match[1].length;
+
+        // add hover decoration for the date
+        decorations.push({
+          range: rangeDate,
+          hoverMessage: formatDistanceToNow(date, { addSuffix: true }),
+        });
       }
     }
 
