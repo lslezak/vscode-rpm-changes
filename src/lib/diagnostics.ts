@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { formatDistanceToNow } from "date-fns";
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
 
 // remember replacements for wrong weekdays and dates
 export const dayReplacements = new Map<vscode.Range, string>();
