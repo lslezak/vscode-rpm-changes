@@ -7,6 +7,10 @@ to structure this file.
 
 ## [Unreleased]
 
+## [1.1.2] - 2025-10-29
+
+- Fixed displaying relative date for days greater than 28
+
 ## [1.1.1] - 2025-10-19
 
 - Refresh the "X minutes ago" hover messages every minute so they always use the

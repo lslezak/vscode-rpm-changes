@@ -102,9 +102,8 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
               ),
               severity: vscode.DiagnosticSeverity.Error,
             });
+            continue;
           }
-
-          continue;
         }
 
         // remember the newest change date
