@@ -29,8 +29,7 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
   let newestChangeDate: number | null = null;
 
   if (document && document.languageId === "rpm-changes") {
-    const regEx =
-      /^(([A-Z][a-z]{2}) +[A-Z][a-z]{2} +([0-9]+) +[0-9:]+ +([A-Z]+) +([0-9]+)) +- +/gm;
+    const regEx = /^(([A-Z][a-z]{2}) +[A-Z][a-z]{2} +([0-9]+) +[0-9:]+ +([A-Z]+) +([0-9]+)) +- +/gm;
     const text = document.getText();
 
     let lastMatchIndex = -1;
@@ -47,15 +46,9 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
           message: `The RPM changes extension does not support timezone "${timeZone}" (only UTC, CET and CEST are supported)`,
           range: new vscode.Range(
             document.positionAt(
-              match.index +
-                match[1].length -
-                match[4].length -
-                match[5].length -
-                1
+              match.index + match[1].length - match[4].length - match[5].length - 1
             ),
-            document.positionAt(
-              match.index + match[1].length - match[4].length - 1
-            )
+            document.positionAt(match.index + match[1].length - match[4].length - 1)
           ),
           severity: vscode.DiagnosticSeverity.Information,
         });
@@ -63,9 +56,7 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
         // Date parsing in JavaScript is broken for timezones other than UTC
         // so we replace CEST/CET with UTC+2/UTC+1
         const tzOffset = tzMappings[timeZone];
-        const changeDate = tzOffset
-          ? match[1].replace(timeZone, tzOffset)
-          : match[1];
+        const changeDate = tzOffset ? match[1].replace(timeZone, tzOffset) : match[1];
 
         const date = new Date(changeDate);
         const unixTime = date.getTime();
@@ -154,9 +145,7 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
           );
 
           diagnostics.push({
-            message: `The weekday "${
-              match[2]
-            }" does not match the date "${date.toDateString()}"`,
+            message: `The weekday "${match[2]}" does not match the date "${date.toDateString()}"`,
             range,
             severity: vscode.DiagnosticSeverity.Warning,
           });
@@ -194,7 +183,5 @@ export function updateDiagnostics(editor: vscode.TextEditor): number | null {
   // the "X minutes ago" hover messages are displayed for dates within the last
   // 45 minutes, so refresh them every minute; older dates are refreshed once
   // an hour
-  return Date.now() - newestChangeDate < 45 * 60 * 1000
-    ? 60 * 1000
-    : 60 * 60 * 1000;
+  return Date.now() - newestChangeDate < 45 * 60 * 1000 ? 60 * 1000 : 60 * 60 * 1000;
 }

@@ -11,7 +11,7 @@
 ## Building extension
 
 - Run `npx vsce package` to build an extension package locally, this generates
-  a *.vsix package file.
+  a \*.vsix package file.
 - To install the extension locally run `code --install-extension *.vsix`.
 
 ## Publishing the extension

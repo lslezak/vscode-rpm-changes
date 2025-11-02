@@ -6,9 +6,7 @@ import { dayReplacements, dateReplacements } from "./diagnostics";
  * Provides code action for fixing wrong days of the week
  */
 export class WeekdayActions implements vscode.CodeActionProvider {
-  public static readonly providedCodeActionKinds = [
-    vscode.CodeActionKind.QuickFix,
-  ];
+  public static readonly providedCodeActionKinds = [vscode.CodeActionKind.QuickFix];
 
   public provideCodeActions(
     document: vscode.TextDocument,

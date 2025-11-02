@@ -23,10 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposable);
 
   // defined the same command but with a different label
-  disposable = vscode.commands.registerCommand(
-    "rpm-changes.insertNewEntry.menu",
-    addChanges
-  );
+  disposable = vscode.commands.registerCommand("rpm-changes.insertNewEntry.menu", addChanges);
   context.subscriptions.push(disposable);
 
   let activeEditor = vscode.window.activeTextEditor;

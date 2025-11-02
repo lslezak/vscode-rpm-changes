@@ -1,8 +1,7 @@
-
 /**
  * Format a number to be at least two digits, add a leading zero if needed
  * @param num the number to pad
- * @returns 
+ * @returns
  */
 function padNumber(num: number): string {
   return num.toString().padStart(2, "0");
