@@ -4,7 +4,7 @@ This is an extension for the [Visual Studio
 Code](https://code.visualstudio.com/) (VSCode) IDE.
 
 It provides syntax highlighting for the RPM `*.changes` files and a command
-for generating a new changes entry.
+for generating a new changes entry and runs some date validations.
 
 ## Features
 
@@ -39,4 +39,5 @@ Just go to the settings configuration in VSCode (`Ctrl + ,`) and navigate to the
 ## Known limitations
 
 - Can validate dates only in UTC, CET and CEST time zones, all others are
-  ignored and not validated.
+  ignored and not validated. But usually the time stamps should be in UTC
+  anyway...
