@@ -5,7 +5,12 @@ Here is a summary of the notable changes in the "RPM Changes" extension.
 <!-- Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how
 to structure this file. -->
 
-## [Unreleased]
+## [1.1.4] - 2025-11-02
+
+- Prettier is a development dependency
+- Fixed changelog
+
+## [1.1.3] - 2025-11-02
 
 - Optimized images, reduced size of the icon and the screencast animation
 - Updated README
