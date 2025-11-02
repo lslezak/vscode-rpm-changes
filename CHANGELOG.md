@@ -1,6 +1,6 @@
 # Change Log
 
-Here is a summary of the notable changes in the "rpm-changes" extension.
+Here is a summary of the notable changes in the "RPM Changes" extension.
 
 <!-- Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how
 to structure this file. -->
@@ -8,6 +8,8 @@ to structure this file. -->
 ## [Unreleased]
 
 - Optimized images, reduced size of the icon and the screencast animation
+- Updated README
+- Use the "RPM Changes:" prefix for the command in the command palette
 
 ## [1.1.2] - 2025-10-29
 
@@ -29,7 +31,7 @@ to structure this file. -->
 - Show a tooltip with relative date ("5 days ago") on hover
 - Do not package the screencast GIF into the published VSCode package,
   makes the package much smaller.
-- Added package icon :smiley:
+- Added package icon 😃
 
 ## [1.0.0] - 2025-10-14
 

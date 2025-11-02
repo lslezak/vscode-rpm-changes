@@ -4,22 +4,29 @@ import { WeekdayActions } from "./lib/actions";
 import { addNewEntry } from "./lib/editor";
 import { updateDiagnostics } from "./lib/diagnostics";
 
+function addChanges() {
+  const editor = vscode.window.activeTextEditor;
+  if (editor && editor.document.languageId === "rpm-changes") {
+    addNewEntry(editor);
+  }
+}
+
 /**
  * Activate the extension
  * @param context extension context from VSCode
  */
 export function activate(context: vscode.ExtensionContext) {
-  const disposable = vscode.commands.registerCommand(
-    // The commandId parameter must match the command field in package.json
-    "rpm-changes.insertNewEntry",
-    () => {
-      const editor = vscode.window.activeTextEditor;
-      if (editor && editor.document.languageId === "rpm-changes") {
-        addNewEntry(editor);
-      }
-    }
+  let disposable = vscode.commands.registerCommand(
+    "rpm-changes.insertNewEntry.command",
+    addChanges
   );
+  context.subscriptions.push(disposable);
 
+  // defined the same command but with a different label
+  disposable = vscode.commands.registerCommand(
+    "rpm-changes.insertNewEntry.menu",
+    addChanges
+  );
   context.subscriptions.push(disposable);
 
   let activeEditor = vscode.window.activeTextEditor;
@@ -72,13 +79,9 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.languages.registerCodeActionsProvider(
-      "rpm-changes",
-      new WeekdayActions(),
-      {
-        providedCodeActionKinds: WeekdayActions.providedCodeActionKinds,
-      }
-    )
+    vscode.languages.registerCodeActionsProvider("rpm-changes", new WeekdayActions(), {
+      providedCodeActionKinds: WeekdayActions.providedCodeActionKinds,
+    })
   );
 }
 

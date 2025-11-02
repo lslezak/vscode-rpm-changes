@@ -12,8 +12,8 @@ for generating a new changes entry.
   it is displayed in red.
 - It can automatically generate a new changes entry:
   - Use the command palette (`Ctrl+Shift+P`)
-    and type `Insert a new changes entry` to execute the command.
-  - Or right-click in the editor and select the `Insert a new changes entry`
+    and run the `RPM Changes: Insert a New Changes Entry` command.
+  - Or right-click in the editor and select the `Insert a New Changes Entry`
     item in the context menu.
 - The author name and email can be read from `.oscrc` file, from Git
   configuration or it can be configured in the extension settings, see below.
@@ -24,7 +24,7 @@ for generating a new changes entry.
 - Validates the date sequence, dates not in sequence are reported as errors.
   As a quick fix previous change date increased by minutes is offered.
 
-![Screencast](https://raw.githubusercontent.com/lslezak/vscode-rpm-changes/refs/tags/v1.1.0/media/screencast.gif)
+![Screencast](https://raw.githubusercontent.com/lslezak/vscode-rpm-changes/refs/tags/v1.1.3/media/screencast.gif)
 
 ## Extension Settings
 
@@ -34,7 +34,7 @@ This extension uses these settings:
 - `rpm-changes.author.email`: The email of the author.
 
 Just go to the settings configuration in VSCode (`Ctrl + ,`) and navigate to the
-`Extensions -> RPM changes configuration` section.
+`Extensions -> RPM Changes` section.
 
 ## Known limitations
 
